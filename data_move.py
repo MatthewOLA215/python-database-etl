@@ -29,20 +29,28 @@ def extract_from_mysql():
     df = pd.read_sql(query, con=engine)
     print("Successfully Loaded from mysql !! ")
     print(df.head(10))
-    df.to_csv("data.csv", index= False)
+    # df.to_csv("data.csv", index= False)
+    return df
 
-    # clothing_df = df[df['category'].isin(['Clothing'])]
+def transorm_data(df):
     clothing_df = df[df['category'] == 'Clothing']
     clothing_df.to_csv('data2.csv', index= False)
+
     
 
-def load_to_postgres():
+def load_to_postgres(df):
     location_url = f"postgresql://{PG_DB_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DATABASE}"
     engine = create_engine(location_url)
-    df = pd.read_csv("data.csv")
     df.to_sql(name="sales_data", con=engine, if_exists="replace")
-    print("Successful!")  
+    print("Successfully Loaded data into Postgres!")  
+  
 
 
-extract_from_mysql()
-load_to_postgres()
+def main():
+    extracted_data = extract_from_mysql()
+    transorm_data(extracted_data)
+    df = pd.read_csv("data2.csv")
+    load_to_postgres(df)
+
+if __name__ == "__main__":
+    main()
